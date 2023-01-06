@@ -11655,18 +11655,27 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
 void Player::SetVisibleItemSlot(uint8 slot, Item* pItem)
 {
     auto itemField = m_values.ModifyValue(&Player::m_playerData).ModifyValue(&UF::PlayerData::VisibleItems, slot);
-    if (pItem)
-    {
-        SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemID), pItem->GetVisibleEntry(this));
-        SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::SecondaryItemModifiedAppearanceID), pItem->GetVisibleSecondaryModifiedAppearanceId(this));
-        SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemAppearanceModID), pItem->GetVisibleAppearanceModId(this));
-        SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemVisual), pItem->GetVisibleItemVisual(this));
+    if (pItem) {
+        if (uint32 entry = GetFakeEntry(pItem)) {
+            if (entry == 1)
+                entry = 0;
+
+            SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemID), entry);
+            SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemAppearanceModID), GetFakeAppearance(pItem));
+            //SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::SecondaryItemModifiedAppearanceID), pItem->GetVisibleSecondaryModifiedAppearanceId(this));
+            SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemVisual), pItem->GetVisibleItemVisual(this));
+        }
+        else {
+            SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemID), pItem->GetVisibleEntry(this));
+            SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemAppearanceModID), pItem->GetVisibleAppearanceModId(this));
+            //SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::SecondaryItemModifiedAppearanceID), pItem->GetVisibleSecondaryModifiedAppearanceId(this));
+            SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemVisual), pItem->GetVisibleItemVisual(this));
+        }
     }
-    else
-    {
+    else {
         SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemID), 0);
-        SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::SecondaryItemModifiedAppearanceID), 0);
         SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemAppearanceModID), 0);
+        //SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::SecondaryItemModifiedAppearanceID), 0);
         SetUpdateFieldValue(itemField.ModifyValue(&UF::VisibleItem::ItemVisual), 0);
     }
 }
@@ -28898,4 +28907,58 @@ void Player::SendDisplayToast(uint32 entry, DisplayToastType type, bool isBonusR
     }
 
     SendDirectMessage(displayToast.Write());
+}
+
+uint16 Player::GetFakeAppearance(const Item* item)
+{
+    if (!item)
+        return 0;
+
+    Player* owner = item->GetOwner();
+
+    if (!owner)
+        return 0;
+
+    if (owner->FakeTransmogrificationMap.empty())
+        return 0;
+
+    DisplayMapType::const_iterator it = owner->FakeTransmogrificationMap.find(item->GetGUID());
+    if (it == owner->FakeTransmogrificationMap.end())
+        return 0;
+
+    return it->second.appearance;
+}
+void Player::SetFakeEntry(Item* item, uint32 entry, uint16 appearance)
+{
+    FakeTransmogrificationMap[item->GetGUID()].entry = entry;
+    FakeTransmogrificationMap[item->GetGUID()].appearance = appearance;
+    SetVisibleItemSlot(item->GetSlot(), item);
+    if (IsInWorld())
+        item->SendUpdateToPlayer(this);
+}
+uint32 Player::GetFakeEntry(const Item* item)
+{
+    if (!item)
+        return 0;
+
+    Player* owner = item->GetOwner();
+
+    if (!owner)
+        return 0;
+
+    if (owner->FakeTransmogrificationMap.empty())
+        return 0;
+
+    DisplayMapType::const_iterator it = owner->FakeTransmogrificationMap.find(item->GetGUID());
+    if (it == owner->FakeTransmogrificationMap.end())
+        return 0;
+
+    return it->second.entry;
+}
+void Player::DeleteFakeEntry(Item* item)
+{
+    FakeTransmogrificationMap.erase(item->GetGUID());
+    SetVisibleItemSlot(item->GetSlot(), item);
+    if (IsInWorld())
+        item->SendUpdateToPlayer(this);
 }

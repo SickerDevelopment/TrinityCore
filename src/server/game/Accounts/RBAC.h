@@ -753,6 +753,21 @@ enum RBACPermissions
     // IF YOU ADD NEW PERMISSIONS, ADD THEM IN 3.3.5 BRANCH AS WELL!
     //
     // custom permissions 1000+
+    RBAC_PERM_COMMAND_DISP                                   = 10000,
+    RBAC_PERM_COMMAND_DISP_HEAD                              = 10001,
+    RBAC_PERM_COMMAND_DISP_SHOULDERS                         = 10002,
+    RBAC_PERM_COMMAND_DISP_SHIRT                             = 10003,
+    RBAC_PERM_COMMAND_DISP_CHEST                             = 10004,
+    RBAC_PERM_COMMAND_DISP_WAIST                             = 10005,
+    RBAC_PERM_COMMAND_DISP_LEGS                              = 10006,
+    RBAC_PERM_COMMAND_DISP_FEET                              = 10007,
+    RBAC_PERM_COMMAND_DISP_WRISTS                            = 10008,
+    RBAC_PERM_COMMAND_DISP_HANDS                             = 10009,
+    RBAC_PERM_COMMAND_DISP_BACK                              = 10010,
+    RBAC_PERM_COMMAND_DISP_TABARD                            = 10011,
+    RBAC_PERM_COMMAND_DISP_MAINHAND                          = 10012,
+    RBAC_PERM_COMMAND_DISP_OFFHAND                           = 10013,
+    RBAC_PERM_COMMAND_DISP_LIST                              = 10014,
     RBAC_PERM_MAX
 };
 

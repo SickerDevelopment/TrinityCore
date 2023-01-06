@@ -307,6 +307,12 @@ typedef std::unordered_set<SpellModifier*> SpellModContainer;
 typedef std::unordered_map<uint32, PlayerCurrency> PlayerCurrenciesMap;
 
 typedef std::unordered_map<uint32 /*instanceId*/, time_t/*releaseTime*/> InstanceTimeMap;
+struct ItemDisplayEntry
+{
+    uint32 entry;
+    uint16 appearance;
+};
+typedef std::unordered_map<ObjectGuid, ItemDisplayEntry> DisplayMapType;
 
 enum ActionButtonUpdateState
 {
@@ -3219,6 +3225,13 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         std::unique_ptr<RestMgr> _restMgr;
 
         bool _usePvpItemLevels;
+
+    public:
+        DisplayMapType FakeTransmogrificationMap;
+        uint32 GetFakeEntry(const Item* item);
+        uint16 GetFakeAppearance(const Item* item);
+        void SetFakeEntry(Item* item, uint32 entry, uint16 appearance);
+        void DeleteFakeEntry(Item* item);
 };
 
 TC_GAME_API void AddItemsSetItem(Player* player, Item const* item);
